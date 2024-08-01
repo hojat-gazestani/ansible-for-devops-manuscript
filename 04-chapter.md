@@ -13,7 +13,7 @@ What attracts most DevOps personnel to Ansible is the fact that it is easy to co
 **Shell Script**
 
 {lang="bash"}
-```
+```sh
 # Install Apache.
 dnf install --quiet -y httpd httpd-devel
 # Copy configuration files.
@@ -35,7 +35,7 @@ $ ./shell-script.sh
 **Ansible Playbook**
 
 {lang="yaml"}
-```
+```yml
 ---
 - hosts: all
 
@@ -55,7 +55,7 @@ $ ./shell-script.sh
 To run the Ansible Playbook (in this case, a file named `playbook.yml` with the contents as above), you would call it using the `ansible-playbook` command:
 
 {lang="text",linenos=off}
-```
+```txt
 # (From the same directory in which the playbook resides).
 $ ansible-playbook playbook.yml
 ```
@@ -73,7 +73,7 @@ The above playbook will perform *exactly* like the shell script, but you can imp
 **Revised Ansible Playbook - Now with idempotence!**
 
 {lang="yaml"}
-```
+```yml
 ---
 - hosts: all
   become: yes
@@ -123,7 +123,7 @@ Now we're getting somewhere. Let me walk you through this simple playbook:
      - In this case, we are using a list of items containing dicts (dictionaries) used for variable substitution; to define each element in a list of dicts with each list item in the format:
 
        {lang="yaml",linenos=off}
-       ~~~
+       ~~~yml
        - var1: value
          var2: value
        ~~~
@@ -151,8 +151,8 @@ You can limit a playbook to specific groups or individual hosts by changing the 
 You can also limit the hosts on which the playbook is run via the `ansible-playbook` command:
 
 {lang="text",linenos=off}
-```
-$ ansible-playbook playbook.yml --limit webservers
+```sh
+ansible-playbook playbook.yml --limit webservers
 ```
 
 In this case (assuming your inventory file contains a `webservers` group), even if the playbook is set to `hosts: all`, or includes hosts in addition to what's defined in the `webservers` group, it will only be run on the hosts defined in `webservers`.
@@ -160,7 +160,7 @@ In this case (assuming your inventory file contains a `webservers` group), even 
 You could also limit the playbook to one particular host:
 
 {lang="text",linenos=off}
-```
+```sh
 $ ansible-playbook playbook.yml --limit xyz.example.com
 ```
 
@@ -174,7 +174,7 @@ $ ansible-playbook playbook.yml --list-hosts
 Running this should give output like:
 
 {lang="text",linenos=off}
-```
+```sh
 playbook: playbook.yml
 
   play #1 (all): host count=4
@@ -191,7 +191,7 @@ playbook: playbook.yml
 If no `remote_user` is defined alongside the `hosts` in a playbook, Ansible assumes you'll connect as the user defined in your inventory file for a particular host, and then will fall back to your local user account name. You can explicitly define a remote user to use for remote plays using the `--user` (`-u`) option:
 
 {lang="text",linenos=off}
-```
+```sh
 $ ansible-playbook playbook.yml --user=johndoe
 ```
 
@@ -200,7 +200,7 @@ In some situations, you will need to pass along your sudo password to the remote
 For example, the following command will run our example playbook with sudo, performing the tasks as the sudo user `janedoe`, and Ansible will prompt you for the sudo password:
 
 {lang="text",linenos=off}
-```
+```sh
 $ ansible-playbook playbook.yml --become --become-user=janedoe \
 --ask-become-pass
 ```
@@ -234,7 +234,7 @@ The first playbook will configure a Rocky Linux server with Node.js, and install
 To start things off, we need to create a YAML file (`playbook.yml` in this example) to contain our playbook. Let's keep things simple:
 
 {lang="yaml"}
-```
+```yml
 ---
 - hosts: all
   become: yes
@@ -258,7 +258,7 @@ Adding extra package repositories (dnf or apt) is one thing many admins will do 
 In the shell script below, we want to add both the EPEL and Remi repositories, so we can get some packages like Node.js or later versions of other necessary software (these examples presume you're running Rocky Linux as the `root` user):
 
 {lang="bash"}
-```
+```sh
 # Install EPEL repo.
 dnf install -y epel-release
 
@@ -282,7 +282,7 @@ I> If you wanted to skip a couple steps, you could skip adding the GPG keys, and
 Ansible makes things a little more robust. Even though the following is slightly more verbose, it performs the same actions in a more structured way, which is simpler to understand, and works with variables and other nifty Ansible features we'll discuss later:
 
 {lang="yaml",starting-line-number=9}
-```
+```yml
     - name: Install EPEL repo.
       dnf: name=epel-release state=present
 
@@ -348,7 +348,7 @@ Don't worry about the syntax or the fact that this is Node.js. We just need a qu
 Since this little app is dependent on Express (an http framework for Node), we also need to tell NPM about this dependency via a `package.json` file in the same folder as `app.js`:
 
 {lang="js"}
-```
+```js
 {
   "name": "examplenodeapp",
   "description": "Example Express Node.js app.",
@@ -391,7 +391,7 @@ We're *almost* finished! The last step is to start the app.
 We'll now use `forever` (which we installed earlier) to start the app.
 
 {lang="yaml",starting-line-number=41}
-```
+```yml
     - name: Check list of running Node.js apps.
       command: /usr/local/bin/forever list
       register: forever_list
@@ -419,7 +419,7 @@ At this point, you have a complete playbook that will install a simple Node.js a
 To run the playbook on a server (in our case, we could just set up a new VirtualBox VM for testing, either via Vagrant or manually), use the following command (pass in the `node_apps_location` variable via the command):
 
 {lang="text",linenos=off}
-```
+```sh
 $ ansible-playbook playbook.yml \
 --extra-vars="node_apps_location=/usr/local/opt/node"
 ```
@@ -445,7 +445,7 @@ At this point, you should be getting comfortable with Ansible playbooks and the 
 To make our playbook more efficient and readable, let's begin the playbook (named `playbook.yml`) by instructing Ansible to load in variables from a separate `vars.yml` file:
 
 {lang="yaml"}
-```
+```yml
 ---
 - hosts: all
   become: yes
@@ -457,7 +457,7 @@ To make our playbook more efficient and readable, let's begin the playbook (name
 Using one or more included variable files cleans up your main playbook file, and lets you organize all your configurable variables in one place. At the moment, we don't have any variables to add; we'll define the contents of `vars.yml` later. For now, create the empty file, and continue on to the next section of the playbook, `pre_tasks`:
 
 {lang="yaml",starting-line-number=8}
-```
+```yml
   pre_tasks:
     - name: Update apt cache if needed.
       apt: update_cache=yes cache_valid_time=3600
@@ -468,7 +468,7 @@ Ansible lets you run tasks before or after the main tasks (defined in `tasks:`) 
 With that out of the way, we'll add another new section to our playbook, `handlers`:
 
 {lang="yaml",starting-line-number=12}
-```
+```yml
   handlers:
     - name: restart apache
       service: name=apache2 state=restarted
@@ -487,7 +487,7 @@ I> By default, Ansible will stop all playbook execution when a task fails, and w
 The first step towards building an application server that depends on the LAMP stack is to build the actual LAMP part of it. This is the simplest process, but still requires a little extra work for our particular server. We want to install Apache, MySQL and PHP, but we'll also need a couple other dependencies.
 
 {lang="yaml",starting-line-number=16}
-```
+```yml
   tasks:
     - name: Get software for apt repository management.
       apt:
@@ -550,7 +550,7 @@ The next step is configuring Apache so it will work correctly with Drupal. Out o
 We also need to add a VirtualHost entry to give Apache the site's document root and provide other options for the site.
 
 {lang="yaml",starting-line-number=63}
-```
+```yml
     - name: Enable Apache rewrite module (required for Drupal).
       apache2_module: name=rewrite state=present
       notify: restart apache
@@ -584,7 +584,7 @@ The second command copies a Jinja template we define inside a `templates` folder
 Let's look at our Jinja template (denoted by the extra `.j2` on the end of the filename), `drupal.test.conf.j2`:
 
 {lang="jinja"}
-```
+```jinja
 <VirtualHost *:80>
     ServerAdmin webmaster@localhost
     ServerName {{ domain }}.test
@@ -603,7 +603,7 @@ This is a fairly standard Apache VirtualHost definition, but we have a few Jinja
 There are two variables we will need (`drupal_core_path` and `domain`), so add them to the empty `vars.yml` file we created earlier:
 
 {lang="yaml"}
-```
+```yml
 ---
 # The path where Drupal will be downloaded and installed.
 drupal_core_path: "/var/www/drupal"
@@ -623,7 +623,7 @@ At this point, you could start the server, but Apache will likely throw an error
 We briefly mentioned `lineinfile` earlier in the book, when discussing file management and ad-hoc task execution. Modifying PHP's configuration is a perfect way to demonstrate `lineinfile`'s simplicity and usefulness:
 
 {lang="yaml",starting-line-number=88}
-```
+```yml
     - name: Adjust OpCache memory setting.
       lineinfile:
         dest: "/etc/php/8.2/apache2/conf.d/10-opcache.ini"
@@ -646,7 +646,7 @@ Ansible will take the regular expression, and see if there's a matching line. If
 The next step is to create a database and user (named for the domain we specified earlier) for our Drupal installation to use.
 
 {lang="yaml",starting-line-number=96}
-```
+```yml
     - name: Create a MySQL database for Drupal.
       mysql_db: "db={{ domain }} state=present"
 
@@ -670,7 +670,7 @@ If we wanted, we could manually download Drupal from Drupal.org, then run the in
 Instead, we're going to set up the Drupal codebase and install Drupal all via automation. Drupal uses Composer to configure its codebase and manage PHP dependencies, so the first step is installing Composer on the server.
 
 {lang="yaml",starting-line-number=107}
-```
+```yml
     - name: Download Composer installer.
       get_url:
         url: https://getcomposer.org/installer
@@ -702,7 +702,7 @@ T> It's best to use an Ansible module for every task. If you have to resort to a
 Now that we have composer available, we can create a Drupal project using Composer's `create-project` command. This command downloads Drupal core and all of it's recommended dependencies to a folder on the server:
 
 {lang="yaml",starting-line-number=124}
-```
+```yml
     - name: Ensure Drupal directory exists.
       file:
         path: "{{ drupal_core_path }}"
@@ -734,7 +734,7 @@ Finally, if that file _doesn't_ already exist, we use Ansible's `composer` modul
 The `composer` task would be equivalent to running the following Composer command directly:
 
 {lang="text",linenos=off}
-```
+```sh
 $ composer create-project drupal/recommended-project /var/www/drupal --no-dev
 ```
 
@@ -747,7 +747,7 @@ Drupal has a command-line companion in the form of Drush. Drush is developed ind
 And once Drush is installed, we can use it to install Drupal:
 
 {lang="yaml",starting-line-number=145}
-```
+```yml
     - name: Add drush to the Drupal site with Composer.
       composer:
         command: require
@@ -774,7 +774,7 @@ Adding the `when` condition to this task also means Drush is only added to the p
 To install Drupal, we use Drush's `si` command (short for `site-install`) to run Drupal's installation (which configures the database (and creates a `sites/default/settings.php` file we can use for idempotence), runs some maintenance, and configures default settings for the site). We passed in the `domain` variable, and added a `drupal_site_name`, so add that variable to your `vars.yml` file:
 
 {lang="yaml",starting-line-number=10}
-```
+```yml
 # Your Drupal site name.
 drupal_site_name: "Drupal Test"
 ```
@@ -786,7 +786,7 @@ Once the site is installed, we also restart Apache for good measure (using `noti
 To run the playbook on a server (either via a local VM for testing or on another server), use the following command:
 
 {lang="text",linenos=off}
-```
+```sh
 $ ansible-playbook playbook.yml
 ```
 
@@ -811,7 +811,7 @@ Apache Solr is a fast and scalable search server optimized for full-text search,
 Just like the previous LAMP server example, we'll begin this playbook (again named `playbook.yml`) by telling Ansible our variables will be in a separate `vars.yml` file:
 
 {lang="yaml"}
-```
+```yml
 ---
 - hosts: all
   become: true
@@ -823,7 +823,7 @@ Just like the previous LAMP server example, we'll begin this playbook (again nam
 Let's quickly create the `vars.yml` file, while we're thinking about it. Create the file in the same folder as your Solr playbook, and add the following contents:
 
 {lang="yaml"}
-```
+```yml
 ---
 download_dir: /tmp
 solr_dir: /opt/solr
@@ -836,7 +836,7 @@ These variables define two paths we'll use while downloading and installing Apac
 Back in our playbook, after the `vars_files`, we also need to make sure the apt cache is up to date, using `pre_tasks` like the previous example:
 
 {lang="yaml",starting-line-number=8}
-```
+```yml
   pre_tasks:
     - name: Update apt cache if needed.
       apt: update_cache=true cache_valid_time=3600
@@ -847,7 +847,7 @@ Back in our playbook, after the `vars_files`, we also need to make sure the apt 
 It's easy enough to install Java on Ubuntu, as it's in the default apt repositories. We just need to make sure the right package is installed:
 
 {lang="yaml",starting-line-number=16}
-```
+```yml
   tasks:
     - name: Install Java.
       apt: name=openjdk-11-jdk state=present
@@ -860,7 +860,7 @@ That was easy enough! We used the `apt` module to install `openjdk-11-jdk`.
 Ubuntu's LTS release includes a package for Apache Solr, but it installs an older version, so we'll install the latest version of Solr from source. The first step is downloading the source:
 
 {lang="yaml",starting-line-number=20}
-```
+```yml
     - name: Download Solr.
       get_url:
         url: "https://archive.apache.org/dist/lucene/solr/\
@@ -878,7 +878,7 @@ We also use `checksum`, an optional parameter, for peace of mind; if you are dow
 We need to expand the Solr archive so we can run the installer inside, and we can use the `creates` option to make this operation idempotent:
 
 {lang="yaml",starting-line-number=26}
-```
+```yml
     - name: Expand Solr.
       unarchive:
         src: "{{ download_dir }}/solr-{{ solr_version }}.tgz"
@@ -893,7 +893,7 @@ T> If you read the `unarchive` module's documentation, you might notice you coul
 Now that the source is present, run the Apache Solr installation script (provided inside the Solr archive's `bin` directory) to complete Solr installation:
 
 {lang="yaml",starting-line-number=33}
-```
+```yml
     - name: Run Solr installation script.
       command: >
         {{ download_dir }}/solr-{{ solr_version }}/bin/install_solr_service.sh
@@ -911,7 +911,7 @@ In this example, the options passed to the installer are hard-coded (e.g. the `-
 Finally, we need a task that runs at the end of the playbook to make sure Apache Solr is started, and will start at system boot:
 
 {lang="yaml",starting-line-number=44}
-```
+```yml
     - name: Ensure solr is started and enabled on boot.
       service: name=solr state=started enabled=yes
 ```
