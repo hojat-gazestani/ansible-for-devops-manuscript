@@ -27,7 +27,7 @@ chkconfig httpd on
 To run the shell script (in this case, a file named `shell-script.sh` with the contents as above), you would call it directly from the command line:
 
 {lang="text",linenos=off}
-```
+```sh
 # (From the same directory in which the shell script resides).
 $ ./shell-script.sh
 ```
